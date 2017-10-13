@@ -13,7 +13,7 @@ class Player(Document):
 	name = StringField(required=True, unique=True, max_length=200)
 
 
-class GamePlayerStats(Document):
+class Record(Document):
 	player = ReferenceField("Player", required=True)
 	game = ReferenceField("Game", required=True)
 	cash_in = FloatField()
@@ -62,9 +62,71 @@ def update_player(player_id):
 	p.update(**json_data)
 	return p.to_json(), 200
 
+@app.route('/games', methods=['GET'])
+def get_games():
+	return Game.objects.to_json()
 
+@app.route('/games/<game_id>', methods=['GET'])
+def get_game(game_id):
+	p = Game.objects(id=game_id)
+	return p.to_json(), 200
 
+@app.route('/games', methods=['POST'])
+def create_game():
+	# TODO: add check for is json
+	json_data = request.get_json()
+	p = Game(**json_data)
+	try:
+		p.save()
+	except NotUniqueError as e:
+		return jsonify({'error' : e.message}), 200
+	return p.to_json(), 201
 
+@app.route('/games/<game_id>', methods=['DELETE'])
+def delete_game(game_id):
+	Game.objects(id=game_id).delete()
+	return jsonify({}), 200
+
+@app.route('/games/<game_id>', methods=['PUT'])
+def update_game(game_id):
+	# TODO: add check for is json
+	json_data = request.get_json()
+	p = Game.objects(id=game_id)
+	p.update(**json_data)
+	return p.to_json(), 200
+
+@app.route('/records', methods=['GET'])
+def get_records():
+	return Record.objects.to_json()
+
+@app.route('/records/<record_id>', methods=['GET'])
+def get_record(record_id):
+	p = Record.objects(id=record_id)
+	return p.to_json(), 200
+
+@app.route('/records', methods=['POST'])
+def create_record():
+	# TODO: add check for is json
+	json_data = request.get_json()
+	p = Record(**json_data)
+	try:
+		p.save()
+	except NotUniqueError as e:
+		return jsonify({'error' : e.message}), 200
+	return p.to_json(), 201
+
+@app.route('/records/<record_id>', methods=['DELETE'])
+def delete_record(record_id):
+	Record.objects(id=record_id).delete()
+	return jsonify({}), 200
+
+@app.route('/records/<record_id>', methods=['PUT'])
+def update_record(record_id):
+	# TODO: add check for is json
+	json_data = request.get_json()
+	p = Record.objects(id=record_id)
+	p.update(**json_data)
+	return p.to_json(), 200
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
